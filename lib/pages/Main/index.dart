@@ -51,8 +51,8 @@ class _MainPageStateState extends State<MainPage> {
   List<BottomNavigationBarItem> _getTabBarWidget() {
     return List.generate(_tableList.length, (index) {
       return BottomNavigationBarItem(
-        icon: Image.asset(_tableList[index].icon!, width: 30, height: 30),// 正常显示图标
-        activeIcon: Image.asset(_tableList[index].activeIcon!, width: 30, height: 30),// 激活图标
+        icon: Image.asset(_tableList[index].icon, width: 30, height: 30),// 正常显示图标
+        activeIcon: Image.asset(_tableList[index].activeIcon, width: 30, height: 30),// 激活图标
         label: _tableList[index].text
       );
     });
