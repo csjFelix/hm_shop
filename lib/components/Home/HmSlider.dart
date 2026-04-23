@@ -26,7 +26,7 @@ class _HmSliderState extends State<HmSlider> {
       carouselController: _controller, // 绑定controller对象
       items: List.generate(widget.bannerList.length, (index) {
         return Image.network(
-          widget.bannerList[index].imagUrl,
+          widget.bannerList[index].imgUrl,
           fit: BoxFit.cover,
           width: screenWidth,
         );
