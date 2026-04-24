@@ -53,5 +53,7 @@ class Diorequest {
   }
 }
 
-//单例对象
+// 单例对象 这里只是一个模块级别的单例，并不算严格意义上的单例模式，外部仍然可以通过new Diorequest()创建一个新的实例
+// 在实际使用中，只要项目里统一使用 dioRequest 这个顶层变量，行为上和单例完全一致，
+// 这是 Flutter/Dart 项目中最常见也最简洁的做法，没有问题
 final dioRequest = Diorequest();
