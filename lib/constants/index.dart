@@ -8,5 +8,5 @@ class GlobalConstans {
 class HttpConstants{
   static const String BANNER_LIST = "/home/banner";
   static const String CATEGORY_HEAD = "/home/category/head";
-  
+  static const String PRODUCT_PREFERENCE = "/hot/preference";// 特惠推荐
 }

@@ -319,3 +319,135 @@ class CategoryItem {
     );
   }
 }
+ // 这个数据模型其实没用到，但是还是留在这可以后面学习
+ // 特惠推荐数据模型
+class SpecialRecommendResponse {
+  String code;
+  String msg;
+  SpecialRecommendResult? result;
+
+  SpecialRecommendResponse({
+    required this.code,
+    required this.msg,
+    this.result,
+  });
+
+  factory SpecialRecommendResponse.formJSON(Map<String, dynamic> result) {
+    return SpecialRecommendResponse(
+      code: result["code"] ?? "",
+      msg: result["msg"] ?? "",
+      result: result["result"] == null
+          ? null
+          : SpecialRecommendResult.formJSON(
+              Map<String, dynamic>.from(result["result"]),
+            ),
+    );
+  }
+}
+
+class SpecialRecommendResult {
+  String id;
+  String title;
+  List<SpecialRecommendSubType> subTypes;
+
+  SpecialRecommendResult({
+    required this.id,
+    required this.title,
+    required this.subTypes,
+  });
+
+  factory SpecialRecommendResult.formJSON(Map<String, dynamic> result) {
+    return SpecialRecommendResult(
+      id: result["id"] ?? "",
+      title: result["title"] ?? "",
+      subTypes: (result["subTypes"] as List? ?? [])
+          .map(
+            (item) =>
+                SpecialRecommendSubType.formJSON(Map<String, dynamic>.from(item)),
+          )
+          .toList(),
+    );
+  }
+}
+
+class SpecialRecommendSubType {
+  String id;
+  String title;
+  SpecialRecommendGoodsItems goodsItems;
+
+  SpecialRecommendSubType({
+    required this.id,
+    required this.title,
+    required this.goodsItems,
+  });
+
+  factory SpecialRecommendSubType.formJSON(Map<String, dynamic> result) {
+    return SpecialRecommendSubType(
+      id: result["id"] ?? "",
+      title: result["title"] ?? "",
+      goodsItems: SpecialRecommendGoodsItems.formJSON(
+        Map<String, dynamic>.from(result["goodsItems"] ?? {}),
+      ),
+    );
+  }
+}
+
+class SpecialRecommendGoodsItems {
+  int counts;
+  int pageSize;
+  int pages;
+  int page;
+  List<SpecialRecommendGoodsItem> items;
+
+  SpecialRecommendGoodsItems({
+    required this.counts,
+    required this.pageSize,
+    required this.pages,
+    required this.page,
+    required this.items,
+  });
+
+  factory SpecialRecommendGoodsItems.formJSON(Map<String, dynamic> result) {
+    return SpecialRecommendGoodsItems(
+      counts: result["counts"] ?? 0,
+      pageSize: result["pageSize"] ?? 0,
+      pages: result["pages"] ?? 0,
+      page: result["page"] ?? 0,
+      items: (result["items"] as List? ?? [])
+          .map(
+            (item) =>
+                SpecialRecommendGoodsItem.formJSON(Map<String, dynamic>.from(item)),
+          )
+          .toList(),
+    );
+  }
+}
+
+class SpecialRecommendGoodsItem {
+  String id;
+  String name;
+  String desc;
+  String price;
+  String picture;
+  int orderNum;
+
+  SpecialRecommendGoodsItem({
+    required this.id,
+    required this.name,
+    required this.desc,
+    required this.price,
+    required this.picture,
+    required this.orderNum,
+  });
+
+  factory SpecialRecommendGoodsItem.formJSON(Map<String, dynamic> result) {
+    return SpecialRecommendGoodsItem(
+      id: result["id"] ?? "",
+      name: result["name"] ?? "",
+      desc: result["desc"] ?? "",
+      price: result["price"] ?? "",
+      picture: result["picture"] ?? "",
+      orderNum: result["orderNum"] ?? 0,
+    );
+  }
+}
