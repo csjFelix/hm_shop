@@ -15,9 +15,15 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-
   // 推荐列表
   List<GoodDetailItem> _recommendList = [];
+  // 定义三个参数
+  // 页码
+  int _page = 1;
+  // 当前正在加载状态
+  bool _isLoading = false;
+  // 是否还有下一页
+  bool _hasMore = true;
 
   // 热榜推荐
   SpecialRecommendResult _inVogueResult = SpecialRecommendResult(
@@ -34,7 +40,7 @@ class _HomeViewState extends State<HomeView> {
   SpecialRecommendResult _specialRecommendResult = SpecialRecommendResult(
     id: "",
     title: "",
-    subTypes: List.empty()
+    subTypes: List.empty(),
   );
   List<CategoryItem> _categoryList = [];
   List<BannerItem> _bannerList = [
@@ -62,10 +68,14 @@ class _HomeViewState extends State<HomeView> {
       SliverToBoxAdapter(child: SizedBox(height: 10)),
 
       // slivergrid和sliverList只能纵向排列
-      SliverToBoxAdapter(child: HmCategory(categoryList: _categoryList)), // 分类组件
+      SliverToBoxAdapter(
+        child: HmCategory(categoryList: _categoryList),
+      ), // 分类组件
       SliverToBoxAdapter(child: SizedBox(height: 10)),
 
-      SliverToBoxAdapter(child: HmSuggestion(specialRecommendResult: _specialRecommendResult)), // 推荐组件
+      SliverToBoxAdapter(
+        child: HmSuggestion(specialRecommendResult: _specialRecommendResult),
+      ), // 推荐组件
       SliverToBoxAdapter(child: SizedBox(height: 10)),
 
       SliverToBoxAdapter(
@@ -74,9 +84,13 @@ class _HomeViewState extends State<HomeView> {
           child: Flex(
             direction: Axis.horizontal,
             children: [
-              Expanded(child: HmHot(result: _inVogueResult, type: "hot",)), // 热榜推荐组件
+              Expanded(
+                child: HmHot(result: _inVogueResult, type: "hot"),
+              ), // 热榜推荐组件
               SizedBox(width: 10),
-              Expanded(child: HmHot(result: _oneStopResult, type: "step",)), // 一站式推荐组件
+              Expanded(
+                child: HmHot(result: _oneStopResult, type: "step"),
+              ), // 一站式推荐组件
             ],
           ),
         ),
@@ -94,6 +108,7 @@ class _HomeViewState extends State<HomeView> {
       _bannerList = list;
     });
   }
+
   void _getCategoryList() async {
     final list = await getCategoryListAPI();
     if (!mounted) return;
@@ -101,6 +116,7 @@ class _HomeViewState extends State<HomeView> {
       _categoryList = list;
     });
   }
+
   void _getSpecialRecommendList() async {
     final result = await getSpecialRecommendListAPI();
     if (!mounted) return;
@@ -121,11 +137,38 @@ class _HomeViewState extends State<HomeView> {
     setState(() {});
   }
 
- // 获取推荐列表
+  // 获取推荐列表
   void _getRecommendList() async {
-    _recommendList = await getRecommendListAPI({"limit": 10});
+    // 当目前已经有请求在加载，或者是已经没有下一页了，就放弃请求
+    if (_isLoading || !_hasMore) {
+      return;
+    }
+    _isLoading = true;
+    int requestLimit = _page * 8;
+    _recommendList = await getRecommendListAPI({"limit": requestLimit});
+    _isLoading = false;
+    
+    // 我要10条，你给10条，说明我要的你都给了，接着认为还有下一页
+    // 我要10条，你给了9条
     setState(() {});
+    if (_recommendList.length < requestLimit) {
+      _hasMore = false;
+      return;
+    }
+    _page++;
   }
+
+  // 监听滚动到底部的事件
+  void _registerEvent() {
+    _controller.addListener(() {
+      if (_controller.position.pixels >=
+          _controller.position.maxScrollExtent - 50) {
+        // 加载下一页数据
+        _getRecommendList();
+      }
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -139,10 +182,15 @@ class _HomeViewState extends State<HomeView> {
     _getInVogueList();
     _getOneStopList();
     _getRecommendList();
+    _registerEvent();
   }
 
+  final ScrollController _controller = ScrollController();
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(slivers: _getScrollChildren()); // sliver家族的内容
+    return CustomScrollView(
+      controller: _controller, // 绑定控制器
+      slivers: _getScrollChildren(),
+    ); // sliver家族的内容
   }
 }
