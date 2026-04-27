@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:hm_shop/api/home.dart';
 import 'package:hm_shop/components/Home/HmCategory.dart';
 import 'package:hm_shop/components/Home/HmHot.dart';
 import 'package:hm_shop/components/Home/HmMoreList.dart';
 import 'package:hm_shop/components/Home/HmSlider.dart';
 import 'package:hm_shop/components/Home/HmSuggestion.dart';
+import 'package:hm_shop/utils/ToastUtils.dart';
 import 'package:hm_shop/viewmodels/home.dart';
 
 class HomeView extends StatefulWidget {
@@ -101,7 +103,7 @@ class _HomeViewState extends State<HomeView> {
     ];
   }
 
-  void _getBannerList() async {
+  Future<void> _getBannerList() async {
     final list = await getBannerListAPI();
     if (!mounted) return;
     setState(() {
@@ -109,7 +111,7 @@ class _HomeViewState extends State<HomeView> {
     });
   }
 
-  void _getCategoryList() async {
+  Future<void> _getCategoryList() async {
     final list = await getCategoryListAPI();
     if (!mounted) return;
     setState(() {
@@ -117,7 +119,7 @@ class _HomeViewState extends State<HomeView> {
     });
   }
 
-  void _getSpecialRecommendList() async {
+  Future<void> _getSpecialRecommendList() async {
     final result = await getSpecialRecommendListAPI();
     if (!mounted) return;
     setState(() {
@@ -126,19 +128,19 @@ class _HomeViewState extends State<HomeView> {
   }
 
   // 获取热榜推荐列表
-  void _getInVogueList() async {
+  Future<void> _getInVogueList() async {
     _inVogueResult = await getInVogueListAPI();
     setState(() {});
   }
 
   // 获取一站式推荐列表
-  void _getOneStopList() async {
+  Future<void> _getOneStopList() async {
     _oneStopResult = await getOneStopListAPI();
     setState(() {});
   }
 
   // 获取推荐列表
-  void _getRecommendList() async {
+  Future<void> _getRecommendList() async {
     // 当目前已经有请求在加载，或者是已经没有下一页了，就放弃请求
     if (_isLoading || !_hasMore) {
       return;
@@ -147,7 +149,7 @@ class _HomeViewState extends State<HomeView> {
     int requestLimit = _page * 8;
     _recommendList = await getRecommendListAPI({"limit": requestLimit});
     _isLoading = false;
-    
+
     // 我要10条，你给10条，说明我要的你都给了，接着认为还有下一页
     // 我要10条，你给了9条
     setState(() {});
@@ -169,28 +171,78 @@ class _HomeViewState extends State<HomeView> {
     });
   }
 
+  //
+  Future<void> _onRefresh() async {
+    _page = 1;
+    // 当前正在加载状态
+    _isLoading = false;
+    // 是否还有下一页
+    _hasMore = true;
+    await _getBannerList();
+    await _getCategoryList();
+    await _getSpecialRecommendList();
+    await _getInVogueList();
+    await _getOneStopList();
+    await _getRecommendList();
+    ToastUtils.showToast(context, "刷新成功");
+    _paddingTop = 0;
+    setState(() {});
+
+    // 数据获取成功，跳一个toast提示用户刷新成功
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     width: 120,
+    //     shape: RoundedRectangleBorder(
+    //       borderRadius: BorderRadiusGeometry.circular(40)
+    //     ),
+    //     behavior: SnackBarBehavior.floating,
+    //     duration: Duration(seconds: 10),
+    //     content: Text("刷新成功", textAlign: TextAlign.center),
+    //   ),
+    // );
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _getBannerList();
-    _getCategoryList();
-    // 获取推荐组件数据
-    _getSpecialRecommendList();
-    // setState(() {});
+    // _getBannerList();
+    // _getCategoryList();
+    // // 获取推荐组件数据
+    // _getSpecialRecommendList();
+    // // setState(() {});
 
-    _getInVogueList();
-    _getOneStopList();
-    _getRecommendList();
+    // _getInVogueList();
+    // _getOneStopList();
+    // _getRecommendList();
     _registerEvent();
+    Future.microtask(() {
+      _paddingTop = 100;
+      setState(() {});
+      _key.currentState?.show();
+    });
   }
+  // initState -> build ->下拉刷新组件 -> 才可以操作这个下拉刷新组件
 
   final ScrollController _controller = ScrollController();
+  // GlobalKey是一个方法可以创建一个key绑定到widget部件上，可以操作widget组件
+  final GlobalKey<RefreshIndicatorState> _key = GlobalKey();
+
+  double _paddingTop = 0;
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      controller: _controller, // 绑定控制器
-      slivers: _getScrollChildren(),
+    return RefreshIndicator(
+      key: _key,
+      onRefresh: (_onRefresh),
+      child: AnimatedContainer(
+        padding: EdgeInsets.only(top: _paddingTop),
+
+        duration: Duration(microseconds: 300),
+        child: CustomScrollView(
+          controller: _controller, // 绑定控制器
+          slivers: _getScrollChildren(),
+        ),
+      ),
     ); // sliver家族的内容
   }
 }
