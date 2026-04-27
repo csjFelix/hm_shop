@@ -15,6 +15,19 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+
+  // 热榜推荐
+  SpecialRecommendResult _inVogueResult = SpecialRecommendResult(
+    id: "",
+    title: "",
+    subTypes: [],
+  );
+  // 一站式推荐
+  SpecialRecommendResult _oneStopResult = SpecialRecommendResult(
+    id: "",
+    title: "",
+    subTypes: [],
+  );
   SpecialRecommendResult _specialRecommendResult = SpecialRecommendResult(
     id: "",
     title: "",
@@ -58,9 +71,9 @@ class _HomeViewState extends State<HomeView> {
           child: Flex(
             direction: Axis.horizontal,
             children: [
-              Expanded(child: HmHot()),
+              Expanded(child: HmHot(result: _inVogueResult, type: "hot",)), // 热榜推荐组件
               SizedBox(width: 10),
-              Expanded(child: HmHot()),
+              Expanded(child: HmHot(result: _oneStopResult, type: "step",)), // 一站式推荐组件
             ],
           ),
         ),
@@ -93,6 +106,18 @@ class _HomeViewState extends State<HomeView> {
     });
   }
 
+  // 获取热榜推荐列表
+  void _getInVogueList() async {
+    _inVogueResult = await getInVogueListAPI();
+    setState(() {});
+  }
+
+  // 获取一站式推荐列表
+  void _getOneStopList() async {
+    _oneStopResult = await getOneStopListAPI();
+    setState(() {});
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -102,6 +127,9 @@ class _HomeViewState extends State<HomeView> {
     // 获取推荐组件数据
     _getSpecialRecommendList();
     // setState(() {});
+
+    _getInVogueList();
+    _getOneStopList();
   }
 
   @override
