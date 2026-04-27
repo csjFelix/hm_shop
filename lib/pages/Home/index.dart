@@ -16,6 +16,9 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
 
+  // 推荐列表
+  List<GoodDetailItem> _recommendList = [];
+
   // 热榜推荐
   SpecialRecommendResult _inVogueResult = SpecialRecommendResult(
     id: "",
@@ -80,7 +83,7 @@ class _HomeViewState extends State<HomeView> {
       ), // 推荐组件
       SliverToBoxAdapter(child: SizedBox(height: 10)),
 
-      HmMoreList(),
+      HmMoreList(recommendList: _recommendList), // 无限滚动列表
     ];
   }
 
@@ -118,6 +121,11 @@ class _HomeViewState extends State<HomeView> {
     setState(() {});
   }
 
+ // 获取推荐列表
+  void _getRecommendList() async {
+    _recommendList = await getRecommendListAPI({"limit": 10});
+    setState(() {});
+  }
   @override
   void initState() {
     // TODO: implement initState
@@ -130,6 +138,7 @@ class _HomeViewState extends State<HomeView> {
 
     _getInVogueList();
     _getOneStopList();
+    _getRecommendList();
   }
 
   @override
