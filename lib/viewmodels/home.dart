@@ -423,6 +423,37 @@ class SpecialRecommendGoodsItems {
   }
 }
 
+class GoodsDetailsItems {
+  int counts;
+  int pageSize;
+  int pages;
+  int page;
+  List<GoodDetailItem> items;
+
+  GoodsDetailsItems({
+    required this.counts,
+    required this.pageSize,
+    required this.pages,
+    required this.page,
+    required this.items,
+  });
+
+  factory GoodsDetailsItems.formJSON(Map<String, dynamic> result) {
+    return GoodsDetailsItems(
+      counts: result["counts"] ?? 0,
+      pageSize: result["pageSize"] ?? 0,
+      pages: result["pages"] ?? 0,
+      page: result["page"] ?? 0,
+      items: (result["items"] as List? ?? [])
+          .map(
+            (item) =>
+                GoodDetailItem.formJSON(Map<String, dynamic>.from(item)),
+          )
+          .toList(),
+    );
+  }
+}
+
 class SpecialRecommendGoodsItem {
   String id;
   String name;
